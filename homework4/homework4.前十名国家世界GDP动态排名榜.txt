@@ -1,0 +1,34 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+import matplotlib.animation as animation
+
+
+df = pd.read_csv("gdp.csv", thousands=",", usecols=["Country Name", "Year", "Value"])
+
+
+def get_top10(year):
+    df_year = df[df["Year"] == year].sort_values(by="Value", ascending=False).head(10)
+    return df_year
+
+
+def draw_barchart(year):
+    ax.clear()
+    df_top10 = get_top10(year)
+    ax.barh(df_top10["Country Name"], df_top10["Value"], color="blue")
+    for i, (value, name) in enumerate(zip(df_top10["Value"], df_top10["Country Name"])):
+        ax.text(value, i, f"{value:,.0f}", ha="left", va="center")
+    ax.xaxis.set_major_formatter(ticker.StrMethodFormatter("{x:,.0f}"))
+    ax.xaxis.set_ticks_position("top")
+    ax.tick_params(axis="x", colors="#777777", labelsize=12)
+    ax.set_yticks(df_top10["Country Name"])
+    ax.yaxis.set_ticks_position("right")
+    ax.margins(0.1, 0.01)
+    ax.text(1, 0.4, year, transform=ax.transAxes, color="#777777", size=46, ha="right", weight="bold")
+    ax.text(0, 1.06, "Top 10 countries by GDP (current US$)", transform=ax.transAxes, size=12, color="#777777")
+    ax.grid(which="major", axis="x", linestyle="-", color="#777777", alpha=0.2)
+    plt.box(False)
+
+fig, ax = plt.subplots(figsize=(15, 8))
+animator = animation.FuncAnimation(fig, draw_barchart, frames=range(1960, 2020), interval=1000)
+animator.save("gdp.mp4")
